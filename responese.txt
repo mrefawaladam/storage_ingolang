@@ -1,0 +1,78 @@
+package main
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+)
+
+type User struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+type Metadata struct {
+	Page       int `json:"page"`
+	Limit      int `json:"limit"`
+	TotalPages int `json:"totalPages"`
+}
+
+type Response struct {
+	Status  string                 `json:"status"`
+	Message string                 `json:"message"`
+	Data    map[string]interface{} `json:"data"`
+}
+
+func main() {
+	e := echo.New()
+
+	e.GET("/users", getUsersHandler)
+
+	e.Start(":8080")
+}
+
+func getUsersHandler(c echo.Context) error {
+	users := []User{
+		{
+			ID:    1,
+			Name:  "John Doe",
+			Email: "johndoe@example.com",
+		},
+		{
+			ID:    2,
+			Name:  "Jane Smith",
+			Email: "janesmith@example.com",
+		},
+		{
+			ID:    3,
+			Name:  "Michael Johnson",
+			Email: "michaeljohnson@example.com",
+		},
+	}
+
+	totalUsers := len(users)
+
+	// Metadata
+	page := 1
+	limit := 10
+	totalPages := 1
+
+	// Create the data map
+	data := make(map[string]interface{})
+	data["users"] = users
+	data["total"] = totalUsers
+	data["metadata"] = Metadata{
+		Page:       page,
+		Limit:      limit,
+		TotalPages: totalPages,
+	}
+
+	response := Response{
+		status:  "success",
+		message: "Data retrieved successfully",
+		Data:    data,
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
